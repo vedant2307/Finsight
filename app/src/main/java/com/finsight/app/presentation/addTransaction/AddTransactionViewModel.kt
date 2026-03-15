@@ -121,7 +121,7 @@ class AddTransactionViewModel @Inject constructor(
                 )
 
                 transactionRepository.insertTransaction(transaction)
-                _uiState.update { it.copy(isLoading = false, isSave = true) }
+                _uiState.update { it.copy(isLoading = false, isSaved = true) }
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
@@ -157,6 +157,10 @@ class AddTransactionViewModel @Inject constructor(
 
             else -> true
         }
+    }
+
+    fun resetSaved() {
+        _uiState.update { it.copy(isSaved = false) }
     }
 
     fun clearError() {

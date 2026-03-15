@@ -4,7 +4,7 @@ import com.finsight.app.data.local.entity.CategoryEntity
 
 data class AddTransactionUiState(
     val isLoading: Boolean = false,
-    val isSave: Boolean = false,
+    val isSaved: Boolean = false,
     val errorMessage: String? = null,
     val amount: String = "",
     val selectedType: TransactionType = TransactionType.EXPENSE,
