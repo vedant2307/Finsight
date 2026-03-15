@@ -43,5 +43,5 @@ interface TransactionDao {
     fun getTotalExpenseByCategory(category: String, startDate: Long, endDate: Long): Flow<Double>
 
     @Query("SELECT * FROM transactions WHERE title LIKE '%' || :query || '%' OR note LIKE '%' || :query || '%' ORDER BY date DESC")
-    fun searchTransaction(query: String): Flow<List<TransactionEntity>>
+    fun searchTransactions(query: String): Flow<List<TransactionEntity>>
 }

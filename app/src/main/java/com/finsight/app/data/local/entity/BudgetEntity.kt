@@ -7,7 +7,7 @@ import java.time.Year
 @Entity(tableName = "budgets")
 data class BudgetEntity(
     @PrimaryKey(autoGenerate = true)
-    val id: Long,
+    val id: Long = 0,
 
     val category: String,
     val amount: Double,
