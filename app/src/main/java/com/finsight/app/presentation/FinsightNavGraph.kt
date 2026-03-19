@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.finsight.app.presentation.home.HomeScreen
 import com.finsight.app.presentation.onboarding.OnboardingScreen
 
 @Composable
@@ -33,6 +34,11 @@ fun FinsightNavGraph(
 
         composable(Screen.Home.route) {
             // HomeScreen will go here
+            HomeScreen(
+                onAddTransaction = {
+                    navController.navigate(Screen.AddTransaction.route)
+                }
+            )
         }
 
         composable(Screen.AddTransaction.route) {
