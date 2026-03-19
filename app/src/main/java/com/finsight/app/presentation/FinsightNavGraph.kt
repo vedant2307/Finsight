@@ -1,14 +1,11 @@
 package com.finsight.app.presentation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
+import com.finsight.app.presentation.onboarding.OnboardingScreen
 
 @Composable
 fun FinsightNavGraph(
@@ -23,6 +20,15 @@ fun FinsightNavGraph(
     ) {
         composable(Screen.Onboarding.route) {
             // OnboardingScreen will go here
+            OnboardingScreen(
+                onBoardingComplete = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Onboarding.route) {
+                            inclusive = true
+                        }
+                    }
+                }
+            )
         }
 
         composable(Screen.Home.route) {

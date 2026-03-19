@@ -46,4 +46,12 @@ object DatabaseModule {
     fun provideBudgetDao(database: AppDatabase): BudgetDao {
         return database.budgetDao()
     }
+
+    @Provides
+    @Singleton
+    fun provideUserPreferences(
+        @ApplicationContext context: Context
+    ): UserPreferences {
+        return UserPreferences(context)
+    }
 }
