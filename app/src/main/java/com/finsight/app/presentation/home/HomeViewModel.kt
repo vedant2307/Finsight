@@ -20,62 +20,76 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val transactionRepository: TransactionRepository,
     private val budgetRepository: BudgetRepository
-): ViewModel() {
+) : ViewModel() {
 
     // Private mutable state — only ViewModel can change this
     private val _uiState = MutableStateFlow(HomeUiState())
 
     // Public read-only state — UI can only observe this
-    val uiState : StateFlow<HomeUiState> = _uiState.asStateFlow()
+    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     init {
         loadHomeData()
     }
 
     private fun loadHomeData() {
-        val calendar = Calendar.getInstance()
-        calendar.set(Calendar.MONTH, 1)
-        calendar.set(Calendar.HOUR_OF_DAY, 0)
-        calendar.set(Calendar.MINUTE, 0)
-        calendar.set(Calendar.SECOND, 0)
-
-        val startOfMonth = calendar.timeInMillis
-        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
-        calendar.set(Calendar.HOUR_OF_DAY, 23)
-        calendar.set(Calendar.MINUTE, 59)
-        calendar.set(Calendar.SECOND, 59)
-
-        val endOfMonth = calendar.timeInMillis
-
-        val currentMonth = Calendar.getInstance().get(Calendar.MONTH) + 1
-        val currentYear = Calendar.getInstance().get(Calendar.YEAR)
-
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
             combine(
-                transactionRepository.getTransactionsByDateRange(startOfMonth, endOfMonth),
-                transactionRepository.getTotalIncome(startOfMonth, endOfMonth),
-                transactionRepository.getTotalExpense(startOfMonth, endOfMonth),
-            ) { transactions, totalIncome, totalExpense ->
+                transactionRepository.getAllTransactions(),
+                transactionRepository.getTotalIncome(
+                    startDate = getStartOfMonth(),
+                    endDate = getEndOfMonth()
+                ),
+                transactionRepository.getTotalExpense(
+                    startDate = getStartOfMonth(),
+                    endDate = getEndOfMonth()
+                )
+            ) { transactions, income, expense ->
                 HomeUiState(
                     isLoading = false,
                     recentTransactions = transactions.take(5),
-                    totalBalance = totalIncome - totalExpense,
-                    totalIncome = totalIncome,
-                    totalExpense = totalExpense
+                    totalIncome = income,
+                    totalExpense = expense,
+                    totalBalance = income - expense
                 )
-            }.catch { error ->
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        error = error.message
-                    )
-                }
-            }.collect { state ->
-                _uiState.update { state }
             }
+                .catch { error ->
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            error = error.message
+                        )
+                    }
+                }
+                .collect { state ->
+                    _uiState.update { state }
+                }
         }
+    }
+
+    private fun getStartOfMonth(): Long {
+        val calendar = Calendar.getInstance()
+        calendar.set(Calendar.DAY_OF_MONTH, 1)
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        return calendar.timeInMillis
+    }
+
+    private fun getEndOfMonth(): Long {
+        val calendar = Calendar.getInstance()
+        calendar.set(
+            Calendar.DAY_OF_MONTH,
+            calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
+        )
+        calendar.set(Calendar.HOUR_OF_DAY, 23)
+        calendar.set(Calendar.MINUTE, 59)
+        calendar.set(Calendar.SECOND, 59)
+        calendar.set(Calendar.MILLISECOND, 999)
+        return calendar.timeInMillis
     }
 
     fun deleteTransaction(transactionEntity: TransactionEntity) {

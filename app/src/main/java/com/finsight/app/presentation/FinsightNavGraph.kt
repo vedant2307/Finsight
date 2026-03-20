@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.finsight.app.presentation.addTransaction.AddTransactionScreen
 import com.finsight.app.presentation.home.HomeScreen
 import com.finsight.app.presentation.onboarding.OnboardingScreen
 
@@ -20,7 +21,6 @@ fun FinsightNavGraph(
         modifier = modifier
     ) {
         composable(Screen.Onboarding.route) {
-            // OnboardingScreen will go here
             OnboardingScreen(
                 onBoardingComplete = {
                     navController.navigate(Screen.Home.route) {
@@ -33,7 +33,6 @@ fun FinsightNavGraph(
         }
 
         composable(Screen.Home.route) {
-            // HomeScreen will go here
             HomeScreen(
                 onAddTransaction = {
                     navController.navigate(Screen.AddTransaction.route)
@@ -42,7 +41,11 @@ fun FinsightNavGraph(
         }
 
         composable(Screen.AddTransaction.route) {
-            // AddTransactionScreen will go here
+            AddTransactionScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
         }
 
         composable(Screen.History.route) {
