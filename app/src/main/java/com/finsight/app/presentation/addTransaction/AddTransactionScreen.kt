@@ -312,19 +312,38 @@ fun AmountInput(amount: String, onAmountChange: (String) -> Unit) {
             )
             Spacer(modifier = Modifier.width(4.dp))
             BasicTextField(
-                value = amount.ifEmpty { "0" },
-                onValueChange = onAmountChange,
+                value = amount,
+                onValueChange = { newValue ->
+                    // If user clears field — allow empty
+                    // Filter to only digits and one decimal
+                    val filtered = newValue.filter { it.isDigit() || it == '.' }
+                    onAmountChange(filtered)
+                },
                 textStyle = TextStyle(
                     fontSize = 48.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Teal900,
+                    color = if (amount.isEmpty()) Color.LightGray else Teal900,
                     textAlign = TextAlign.Center
                 ),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Decimal
                 ),
                 singleLine = true,
-                modifier = Modifier.width(200.dp)
+                modifier = Modifier.width(200.dp),
+                decorationBox = { innerTextField ->
+                    Box(contentAlignment = Alignment.Center) {
+                        if (amount.isEmpty()) {
+                            Text(
+                                text = "0",
+                                fontSize = 48.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.LightGray,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                        innerTextField()
+                    }
+                }
             )
         }
     }
