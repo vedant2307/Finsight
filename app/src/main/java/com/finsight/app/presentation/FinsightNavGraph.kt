@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.finsight.app.presentation.addTransaction.AddTransactionScreen
+import com.finsight.app.presentation.history.HistoryScreen
 import com.finsight.app.presentation.home.HomeScreen
 import com.finsight.app.presentation.onboarding.OnboardingScreen
 
@@ -49,7 +50,7 @@ fun FinsightNavGraph(
         }
 
         composable(Screen.History.route) {
-            // HistoryScreen will go here
+            HistoryScreen()
         }
 
         composable(Screen.Budget.route) {
