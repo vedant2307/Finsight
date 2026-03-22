@@ -40,7 +40,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.finsight.app.data.local.entity.TransactionEntity
 import com.finsight.app.presentation.home.TransactionItem
-import com.finsight.app.presentation.home.getCategoryEmoji
 import com.finsight.app.ui.theme.Teal500
 import com.finsight.app.ui.theme.Teal900
 import java.text.SimpleDateFormat

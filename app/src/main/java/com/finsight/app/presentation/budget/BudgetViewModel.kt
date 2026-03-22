@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -56,60 +58,82 @@ class BudgetViewModel @Inject constructor(
 
     private fun loadBudgets() {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(isLoading = true)
-            }
+            _uiState.update { it.copy(isLoading = true) }
 
             budgetRepository.getAllBudgetsByMonthAndYear(currentMonth, currentYear)
                 .catch { error ->
-                    _uiState.update { it.copy(isLoading = false, errorMessage = error.message) }
-                }.collect { budgets ->
-                    // For each budget — calculate how much is spent
-                    calculateBudgetProgress(budgets)
+                    _uiState.update {
+                        it.copy(isLoading = false, errorMessage = error.message)
+                    }
+                }
+                .collect { budgets ->
+                    if (budgets.isEmpty()) {
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                budgets = emptyList(),
+                                budgetProgressList = emptyList(),
+                                totalBudget = 0.0,
+                                totalSpent = 0.0
+                            )
+                        }
+                        return@collect
+                    }
+
+                    // For each budget — combine with live spending flow
+                    observeBudgetProgress(budgets)
                 }
         }
     }
 
-    private fun calculateBudgetProgress(budgets: List<BudgetEntity>) {
+    private fun observeBudgetProgress(budgets: List<BudgetEntity>) {
         viewModelScope.launch {
-            val budgetProgressList = mutableListOf<BudgetProgress>()
-            budgets.forEach { budget ->
+
+            // Create a Flow for each budget's spending
+            val spendingFlows = budgets.map { budget ->
                 transactionRepository.getTotalExpenseByCategory(
-                    budget.category,
-                    startOfMonth,
-                    endOfMonth
-                ).catch {
-
-                }.collect { spent ->
-                    val progress = if (budget.amount > 0) {
-                        (spent / budget.amount).toFloat()
-                    } else {
-                        0f
-                    }
-
-                    budgetProgressList.add(
-                        BudgetProgress(
-                            spent = spent,
-                            budget = budget,
-                            progress = progress.coerceIn(0f, 1f),
-                            isOverBudget = spent > budget.amount
-                        )
-                    )
-                }
-            }
-
-            val totalBudget = budgets.sumOf { it.amount }
-            val totalSpent = budgetProgressList.sumOf { it.spent }
-
-            _uiState.update {
-                it.copy(
-                    isLoading = false,
-                    budgets = budgets,
-                    budgetProgressList = budgetProgressList,
-                    totalBudget = totalBudget,
-                    totalSpent = totalSpent
+                    category = budget.category,
+                    startDate = startOfMonth,
+                    endDate = endOfMonth
                 )
             }
+
+            // Combine ALL spending flows together
+            // Emits every time ANY spending changes
+            combine(spendingFlows) { spentArray ->
+                val progressList = budgets.mapIndexed { index, budget ->
+                    val spent = spentArray[index]
+                    val progress = if (budget.amount > 0) {
+                        (spent / budget.amount).toFloat()
+                    } else 0f
+
+                    BudgetProgress(
+                        budget = budget,
+                        spent = spent,
+                        progress = progress.coerceIn(0f, 1f),
+                        isOverBudget = spent > budget.amount
+                    )
+                }
+
+                val totalBudget = budgets.sumOf { it.amount }
+                val totalSpent = progressList.sumOf { it.spent }
+
+                Triple(progressList, totalBudget, totalSpent)
+            }
+                .catch { error ->
+                    _uiState.update { it.copy(errorMessage = error.message) }
+                }
+                .collect { (progressList, totalBudget, totalSpent) ->
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            budgets = budgets,
+                            budgetProgressList = progressList,
+                            totalBudget = totalBudget,
+                            totalSpent = totalSpent
+                        )
+                    }
+                }
         }
     }
 

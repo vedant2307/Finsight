@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.finsight.app.data.local.entity.TransactionEntity
+import com.finsight.app.presentation.Utils
 import com.finsight.app.ui.theme.Green100
 import com.finsight.app.ui.theme.Green500
 import com.finsight.app.ui.theme.Red100
@@ -361,7 +362,7 @@ fun TransactionItem(transaction: TransactionEntity) {
                 .background(bgColor),
             contentAlignment = Alignment.Center
         ) {
-            Text(text = getCategoryEmoji(transaction.category), fontSize = 20.sp)
+            Text(text = Utils.getCategoryEmoji(transaction.category), fontSize = 20.sp)
         }
 
         Spacer(modifier = Modifier.width(12.dp))
@@ -422,27 +423,6 @@ fun EmptyTransactionState() {
             fontSize = 13.sp,
             color = Color.Gray
         )
-    }
-}
-
-// ── HELPERS ───────────────────────────────────────────────
-
-fun getCategoryEmoji(category: String): String {
-    return when (category.lowercase()) {
-        "food"          -> "🍔"
-        "transport"     -> "🚗"
-        "shopping"      -> "🛍️"
-        "groceries"     -> "🛒"
-        "bills"         -> "💡"
-        "health"        -> "💊"
-        "rent"          -> "🏠"
-        "entertainment" -> "🎬"
-        "travel"        -> "✈️"
-        "education"     -> "📚"
-        "salary"        -> "💰"
-        "freelance"     -> "💻"
-        "investment"    -> "📈"
-        else            -> "📦"
     }
 }
 
