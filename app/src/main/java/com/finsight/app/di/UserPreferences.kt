@@ -61,4 +61,18 @@ class UserPreferences @Inject constructor(
             preferences[SELECTED_CURRENCY] = selectedCurrency
         }
     }
+
+    // Add these after saveOnBoardingData
+
+    suspend fun saveName(name: String) {
+        context.dataStore.edit { preferences ->
+            preferences[USER_NAME] = name
+        }
+    }
+
+    suspend fun saveSalary(salary: Double) {
+        context.dataStore.edit { preferences ->
+            preferences[MONTHLY_SALARY] = salary
+        }
+    }
 }

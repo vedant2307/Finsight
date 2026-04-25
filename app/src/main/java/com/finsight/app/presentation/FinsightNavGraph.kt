@@ -10,6 +10,7 @@ import com.finsight.app.presentation.budget.BudgetScreen
 import com.finsight.app.presentation.history.HistoryScreen
 import com.finsight.app.presentation.home.HomeScreen
 import com.finsight.app.presentation.onboarding.OnboardingScreen
+import com.finsight.app.presentation.settings.SettingsScreen
 
 @Composable
 fun FinsightNavGraph(
@@ -60,6 +61,7 @@ fun FinsightNavGraph(
 
         composable(Screen.Settings.route) {
             // SettingsScreen will go here
+            SettingsScreen()
         }
     }
 }
