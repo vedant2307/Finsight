@@ -1,5 +1,6 @@
 package com.finsight.app.presentation.addTransaction
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.finsight.app.data.local.entity.CategoryEntity
@@ -18,15 +19,24 @@ import javax.inject.Inject
 @HiltViewModel
 class AddTransactionViewModel @Inject constructor(
     private val transactionRepository: TransactionRepository,
-    private val categoryRepository: CategoryRepository
+    private val categoryRepository: CategoryRepository,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AddTransactionUiState())
 
     val uiState: StateFlow<AddTransactionUiState> = _uiState.asStateFlow()
 
+    // SavedStateHandle is how a ViewModel reads nav arguments without touching the NavController directly
+    private val navTransactionId: Long? = savedStateHandle.get<Long>("transactionId")?.takeIf { it != -1L }
+    private var pendingEditCategoryName: String? = null
+
+
     init {
         loadCategories()
+        navTransactionId?.let {
+            loadTransactionForEdit(it)
+        }
     }
 
     private fun loadCategories() {
@@ -42,14 +52,59 @@ class AddTransactionViewModel @Inject constructor(
                     if (categories.isEmpty()) {
                         categoryRepository.insertDefaultCategories()
                     } else {
-                        _uiState.update {
-                            it.copy(
+                        _uiState.update { state ->
+                            state.copy(
                                 isLoading = false,
-                                categories = categories
+                                categories = categories,
+                                selectedCategory = state.selectedCategory
+                                    ?: pendingEditCategoryName?.let { name ->
+                                        categories.find { it.name == name }
+                                    }
                             )
                         }
                     }
                 }
+        }
+    }
+
+    private fun loadTransactionForEdit(transactionId: Long) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+
+            val transaction = transactionRepository.getTransactionById(transactionId)
+            if (transaction == null) {
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = "Transaction not found"
+                    )
+                }
+                return@launch
+            }
+
+            pendingEditCategoryName = transaction.category
+
+            _uiState.update { state ->
+                state.copy(
+                    isLoading = false,
+                    editingTransactionId = transaction.id,
+                    amount = formatAmountForEdit(transaction.amount),
+                    selectedType = if (transaction.type == "INCOME") TransactionType.INCOME else TransactionType.EXPENSE,
+                    selectedCategory = state.categories.find { it.name == transaction.category },
+                    title = transaction.title,
+                    note = transaction.note,
+                    date = transaction.date
+                )
+            }
+
+        }
+    }
+
+    private fun formatAmountForEdit(amount: Double): String {
+        return if (amount == amount.toLong().toDouble()) {
+            amount.toLong().toString()
+        } else {
+            amount.toString()
         }
     }
 
@@ -112,6 +167,7 @@ class AddTransactionViewModel @Inject constructor(
 
             try {
                 val transaction = TransactionEntity(
+                    id = state.editingTransactionId ?: 0,
                     title = state.title,
                     amount = state.amount.toDouble(),
                     type = state.selectedType.name,
@@ -120,7 +176,11 @@ class AddTransactionViewModel @Inject constructor(
                     note = state.note
                 )
 
-                transactionRepository.insertTransaction(transaction)
+                if (state.isEditMode) {
+                    transactionRepository.updateTransaction(transaction)
+                } else {
+                    transactionRepository.insertTransaction(transaction)
+                }
                 _uiState.update { it.copy(isLoading = false, isSaved = true) }
             } catch (e: Exception) {
                 _uiState.update {

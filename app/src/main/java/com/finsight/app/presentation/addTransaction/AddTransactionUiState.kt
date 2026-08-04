@@ -12,8 +12,11 @@ data class AddTransactionUiState(
     val categories: List<CategoryEntity> = emptyList(),
     val title: String = "",
     val note: String = "",
-    val date: Long = System.currentTimeMillis()
-)
+    val date: Long = System.currentTimeMillis(),
+    val editingTransactionId: Long? = null
+) {
+    val isEditMode: Boolean get() = editingTransactionId != null
+}
 
 enum class TransactionType {
     INCOME,

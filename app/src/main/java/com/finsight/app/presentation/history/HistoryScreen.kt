@@ -11,13 +11,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -25,12 +26,20 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,6 +49,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.finsight.app.data.local.entity.TransactionEntity
 import com.finsight.app.presentation.home.TransactionItem
+import com.finsight.app.ui.theme.Red500
 import com.finsight.app.ui.theme.Teal500
 import com.finsight.app.ui.theme.Teal900
 import java.text.SimpleDateFormat
@@ -49,6 +59,7 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(
+    onEditTransaction: (Long) -> Unit,
     viewModel: HistoryViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -137,6 +148,7 @@ fun HistoryScreen(
                 else -> {
                     TransactionList(
                         transactions = uiState.filteredTransactions,
+                        onEditTransaction = onEditTransaction,
                         onDeleteTransaction = viewModel::deleteTransaction
                     )
                 }
@@ -189,12 +201,15 @@ fun FilterTabs(
 @Composable
 fun TransactionList(
     transactions: List<TransactionEntity>,
+    onEditTransaction: (Long) -> Unit,
     onDeleteTransaction: (TransactionEntity) -> Unit
 ) {
     // Group transactions by date
     val groupedTransactions = transactions.groupBy { transaction ->
         SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date(transaction.date))
     }
+
+    var transactionPendingDelete by remember { mutableStateOf<TransactionEntity?>(null) }
 
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         groupedTransactions.forEach { (date, transactionsForDate) ->
@@ -218,7 +233,11 @@ fun TransactionList(
                 items = transactionsForDate,
                 key = { it.id }
             ) { transaction ->
-                TransactionItem(transaction = transaction)
+                SwipeToDeleteTransactionItem(
+                    transaction = transaction,
+                    onClick = {onEditTransaction(transaction.id)},
+                    onDeleteRequest = { transactionPendingDelete = transaction }
+                )
             }
 
             item {
@@ -231,6 +250,29 @@ fun TransactionList(
                 )
             }
         }
+    }
+
+    transactionPendingDelete?.let { transaction ->
+        AlertDialog(
+            onDismissRequest = { transactionPendingDelete = null },
+            title = { Text("Delete transaction?") },
+            text = { Text("\"${transaction.title}\" will be permanently deleted. This can't be undone.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onDeleteTransaction(transaction)
+                        transactionPendingDelete = null
+                    }
+                ) {
+                    Text("Delete", color = Red500)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { transactionPendingDelete = null }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
 
@@ -278,5 +320,47 @@ fun formatDateHeader(dateString: String): String {
         today -> "Today"
         yesterday -> "Yesterday"
         else -> dateString
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SwipeToDeleteTransactionItem(
+    transaction: TransactionEntity,
+    onClick: () -> Unit,
+    onDeleteRequest: (TransactionEntity) -> Unit
+) {
+    val dismissState = rememberSwipeToDismissBoxState()
+
+    LaunchedEffect(dismissState.settledValue) {
+        if (dismissState.settledValue == SwipeToDismissBoxValue.EndToStart) {
+            onDeleteRequest(transaction)
+            dismissState.reset()
+        }
+    }
+
+    SwipeToDismissBox(
+        state = dismissState,
+        enableDismissFromStartToEnd = false,
+        enableDismissFromEndToStart = true,
+        backgroundContent = {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Red500, RoundedCornerShape(12.dp))
+                    .padding(horizontal = 20.dp),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete",
+                    tint = Color.White
+                )
+            }
+        }
+    ) {
+        Box(modifier = Modifier.background(Color.White)) {
+            TransactionItem(transaction = transaction, onClick = onClick)
+        }
     }
 }

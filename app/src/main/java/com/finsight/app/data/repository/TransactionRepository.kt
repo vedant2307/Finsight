@@ -52,6 +52,10 @@ class TransactionRepository @Inject constructor(
         return transactionDao.searchTransactions(query)
     }
 
+    suspend fun getTransactionById(id: Long) : TransactionEntity? {
+        return transactionDao.getTransactionById(id)
+    }
+
     // Write operations
 
     suspend fun insertTransaction(transaction: TransactionEntity) {

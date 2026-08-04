@@ -44,4 +44,9 @@ interface TransactionDao {
 
     @Query("SELECT * FROM transactions WHERE title LIKE '%' || :query || '%' OR note LIKE '%' || :query || '%' ORDER BY date DESC")
     fun searchTransactions(query: String): Flow<List<TransactionEntity>>
+
+    // suspend instead of returning a Flow — this is a one-time read,
+    // not something we need to keep observing.
+    @Query("SELECT * FROM transactions WHERE id = :id")
+    suspend fun getTransactionById(id: Long): TransactionEntity?
 }

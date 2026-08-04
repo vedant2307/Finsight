@@ -1,6 +1,7 @@
 package com.finsight.app.presentation.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -52,6 +53,7 @@ import java.util.Locale
 @Composable
 fun HomeScreen(
     onAddTransaction : () -> Unit,
+    onEditTransaction : (Long) -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -126,7 +128,10 @@ fun HomeScreen(
                 item { EmptyTransactionState() }
             } else {
                 items(uiState.recentTransactions) { transaction ->
-                    TransactionItem(transaction = transaction)
+                    TransactionItem(
+                        transaction = transaction,
+                        onClick = { onEditTransaction(transaction.id) }
+                    )
                 }
             }
 
@@ -342,7 +347,10 @@ fun BudgetProgressSection(totalSpent: Double, totalBudget: Double) {
 // ── TRANSACTION ITEM ──────────────────────────────────────
 
 @Composable
-fun TransactionItem(transaction: TransactionEntity) {
+fun TransactionItem(
+    transaction: TransactionEntity,
+    onClick: () -> Unit = {}
+) {
     val isExpense = transaction.type == "EXPENSE"
     val amountColor = if (isExpense) Red500 else Green500
     val amountPrefix = if (isExpense) "-" else "+"
@@ -351,7 +359,8 @@ fun TransactionItem(transaction: TransactionEntity) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp),
+            .padding(horizontal = 16.dp, vertical = 4.dp)
+            .clickable(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Category icon

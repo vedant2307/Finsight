@@ -22,7 +22,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -133,7 +133,7 @@ fun AddTransactionScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Add Transaction",
+                        text = if (uiState.isEditMode) "Edit Transaction" else "Add Transaction",
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
@@ -141,7 +141,7 @@ fun AddTransactionScreen(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
                             tint = Color.White
                         )
@@ -277,7 +277,7 @@ fun AddTransactionScreen(
                     )
                 } else {
                     Text(
-                        text = "Save Transaction",
+                        text = if (uiState.isEditMode) "Update Transaction" else "Save Transaction",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold
                     )

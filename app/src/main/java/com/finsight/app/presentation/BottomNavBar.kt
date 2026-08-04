@@ -1,8 +1,8 @@
 package com.finsight.app.presentation
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PieChart
 import androidx.compose.material3.Icon
@@ -29,7 +29,7 @@ data class BottomNavItem(
 
 val bottomNavItems = listOf<BottomNavItem>(
     BottomNavItem("Home", Icons.Default.Home, Screen.Home.route),
-    BottomNavItem("History", Icons.Default.List, Screen.History.route),
+    BottomNavItem("History", Icons.AutoMirrored.Filled.List, Screen.History.route),
     BottomNavItem("Budget", Icons.Default.PieChart, Screen.Budget.route),
     BottomNavItem("Profile", Icons.Default.Person, Screen.Settings.route),
 
