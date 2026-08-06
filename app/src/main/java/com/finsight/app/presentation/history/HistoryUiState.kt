@@ -8,7 +8,8 @@ data class HistoryUiState(
     val filteredTransactions: List<TransactionEntity> = emptyList(),
     val selectedFilter: TransactionFilter = TransactionFilter.ALL,
     val searchQuery: String = "",
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val showUndoDeleteSnackBar: Long? = null
 )
 
 enum class TransactionFilter {

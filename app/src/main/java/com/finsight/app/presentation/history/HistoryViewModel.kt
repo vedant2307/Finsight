@@ -20,6 +20,9 @@ class HistoryViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(HistoryUiState())
     val uiState: StateFlow<HistoryUiState> = _uiState.asStateFlow()
 
+    private var recentDeletedTransaction: TransactionEntity? = null
+    private var snackBarEventId = 0L
+
     init {
         loadTransactions()
     }
@@ -75,8 +78,25 @@ class HistoryViewModel @Inject constructor(
 
     fun deleteTransaction(transactionEntity: TransactionEntity) {
         viewModelScope.launch {
+            recentDeletedTransaction = transactionEntity
             transactionRepository.deleteTransaction(transactionEntity)
+            _uiState.update { it.copy(showUndoDeleteSnackBar = ++snackBarEventId) }
         }
+    }
+
+    fun undoDelete() {
+        viewModelScope.launch {
+            recentDeletedTransaction?.let { transaction ->
+                transactionRepository.insertTransaction(transaction)
+            }
+            recentDeletedTransaction = null
+            _uiState.update { it.copy(showUndoDeleteSnackBar = null) }
+        }
+    }
+
+    fun snackBarDismissed() {
+        recentDeletedTransaction = null
+        _uiState.update { it.copy(showUndoDeleteSnackBar = null) }
     }
 
     private fun applyFilter(

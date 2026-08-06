@@ -18,7 +18,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -26,10 +25,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberSwipeToDismissBoxState
@@ -37,9 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -63,8 +63,26 @@ fun HistoryScreen(
     viewModel: HistoryViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val snackBarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(uiState.showUndoDeleteSnackBar) {
+        if (uiState.showUndoDeleteSnackBar != null) {
+            val result = snackBarHostState.showSnackbar(
+                "Transaction Deleted",
+                "Undo",
+                duration = SnackbarDuration.Short
+            )
+
+            if (result == SnackbarResult.ActionPerformed) {
+                viewModel.undoDelete()
+            } else {
+                viewModel.snackBarDismissed()
+            }
+        }
+    }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackBarHostState) },
         topBar = {
             TopAppBar(
                 title = {
@@ -209,8 +227,6 @@ fun TransactionList(
         SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date(transaction.date))
     }
 
-    var transactionPendingDelete by remember { mutableStateOf<TransactionEntity?>(null) }
-
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         groupedTransactions.forEach { (date, transactionsForDate) ->
 
@@ -236,7 +252,7 @@ fun TransactionList(
                 SwipeToDeleteTransactionItem(
                     transaction = transaction,
                     onClick = {onEditTransaction(transaction.id)},
-                    onDeleteRequest = { transactionPendingDelete = transaction }
+                    onDeleteRequest = { onDeleteTransaction(transaction) }
                 )
             }
 
@@ -250,29 +266,6 @@ fun TransactionList(
                 )
             }
         }
-    }
-
-    transactionPendingDelete?.let { transaction ->
-        AlertDialog(
-            onDismissRequest = { transactionPendingDelete = null },
-            title = { Text("Delete transaction?") },
-            text = { Text("\"${transaction.title}\" will be permanently deleted. This can't be undone.") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onDeleteTransaction(transaction)
-                        transactionPendingDelete = null
-                    }
-                ) {
-                    Text("Delete", color = Red500)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { transactionPendingDelete = null }) {
-                    Text("Cancel")
-                }
-            }
-        )
     }
 }
 
@@ -330,14 +323,14 @@ fun SwipeToDeleteTransactionItem(
     onClick: () -> Unit,
     onDeleteRequest: (TransactionEntity) -> Unit
 ) {
-    val dismissState = rememberSwipeToDismissBoxState()
-
-    LaunchedEffect(dismissState.settledValue) {
-        if (dismissState.settledValue == SwipeToDismissBoxValue.EndToStart) {
-            onDeleteRequest(transaction)
-            dismissState.reset()
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = { targetValue ->
+            if (targetValue == SwipeToDismissBoxValue.EndToStart) {
+                onDeleteRequest(transaction)
+            }
+            false
         }
-    }
+    )
 
     SwipeToDismissBox(
         state = dismissState,
