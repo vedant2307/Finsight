@@ -1,6 +1,7 @@
 package com.finsight.app.presentation.budget
 
 import com.finsight.app.data.local.entity.BudgetEntity
+import com.finsight.app.domain.model.CategoryTotal
 
 data class BudgetUiState(
     val isLoading: Boolean = false,
@@ -9,7 +10,8 @@ data class BudgetUiState(
     val budgetProgressList: List<BudgetProgress> = emptyList(),
     val totalBudget: Double = 0.0,
     val totalSpent: Double = 0.0,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val categoryTotals: List<CategoryTotal> = emptyList()
 )
 
 data class BudgetProgress(

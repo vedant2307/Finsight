@@ -5,13 +5,14 @@ import androidx.lifecycle.viewModelScope
 import com.finsight.app.data.local.entity.BudgetEntity
 import com.finsight.app.data.repository.BudgetRepository
 import com.finsight.app.data.repository.TransactionRepository
+import com.finsight.app.domain.model.CategoryTotal
+import com.finsight.app.presentation.Utils.getCategoryEmoji
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -54,6 +55,7 @@ class BudgetViewModel @Inject constructor(
         endOfMonth = calendar.timeInMillis
 
         loadBudgets()
+        loadCategoryBreakDown()
     }
 
     private fun loadBudgets() {
@@ -134,6 +136,35 @@ class BudgetViewModel @Inject constructor(
                         )
                     }
                 }
+        }
+    }
+
+    private fun loadCategoryBreakDown() {
+        viewModelScope.launch {
+            transactionRepository.getAllTransactions().collect { transactions ->
+                val expenseTransactions = transactions.filter { it.type == "EXPENSE" }
+                val totalExpense = transactions.sumOf { it.amount }
+
+                val categoryTotalList: List<CategoryTotal> = if (totalExpense == 0.0) {
+                    emptyList()
+                } else {
+                    expenseTransactions.groupBy {
+                        it.category
+                    }.map { (categoryName, transactions) ->
+                        val categoryTotal = transactions.sumOf { it.amount }
+                        val percentage = ((categoryTotal / totalExpense) * 100).toFloat()
+
+                        CategoryTotal(
+                            categoryName = categoryName,
+                            emoji = getCategoryEmoji(categoryName),
+                            totalAmount = categoryTotal,
+                            percentage = percentage
+                        )
+                    }.sortedByDescending { it.totalAmount }
+                }
+
+                _uiState.update { it.copy(categoryTotals = categoryTotalList) }
+            }
         }
     }
 

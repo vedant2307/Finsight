@@ -1,6 +1,5 @@
 package com.finsight.app.presentation.budget
 
-import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -60,7 +59,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.finsight.app.data.local.entity.BudgetEntity
 import com.finsight.app.presentation.Utils
 import com.finsight.app.ui.theme.Amber500
 import com.finsight.app.ui.theme.Red500
@@ -146,6 +144,11 @@ fun BudgetScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            item {
+                CategoryBreakdownCard(categoryTotals = uiState.categoryTotals)
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
             // ── OVERALL SUMMARY ───────────────────────────
             item {
                 OverallBudgetCard(
