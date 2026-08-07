@@ -28,6 +28,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.finsight.app.domain.model.CategoryTotal
 
+val chartColors = listOf(
+    Color(0xFF4A9E8F), // teal — your app's primary
+    Color(0xFFFF6B6B), // coral red
+    Color(0xFFFFB347), // amber
+    Color(0xFF6C8EBF), // slate blue
+    Color(0xFFB07FD4), // purple
+    Color(0xFF4FC3A1), // mint
+    Color(0xFFFF8C69), // salmon
+    Color(0xFF98D8C8)  // light teal
+)
+
 @Composable
 fun CategoryBreakdownCard(categoryTotals: List<CategoryTotal>) {
     Card(
@@ -112,8 +123,8 @@ private fun CategoryBreakdownRow(categoryTotal: CategoryTotal) {
                         .weight(1f)
                         .height(6.dp)
                         .clip(RoundedCornerShape(3.dp)),
-                    color = Color(0xFF4A9E8F),
-                    trackColor = Color(0xFFE8F5F3)
+                    color = categoryTotal.color,
+                    trackColor = categoryTotal.color.copy(alpha = 0.15f)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(

@@ -143,27 +143,31 @@ class BudgetViewModel @Inject constructor(
         viewModelScope.launch {
             transactionRepository.getAllTransactions().collect { transactions ->
                 val expenseTransactions = transactions.filter { it.type == "EXPENSE" }
-                val totalExpense = transactions.sumOf { it.amount }
+                val totalExpense = expenseTransactions.sumOf { it.amount }
 
                 val categoryTotalList: List<CategoryTotal> = if (totalExpense == 0.0) {
                     emptyList()
                 } else {
                     expenseTransactions.groupBy {
                         it.category
-                    }.map { (categoryName, transactions) ->
-                        val categoryTotal = transactions.sumOf { it.amount }
-                        val percentage = ((categoryTotal / totalExpense) * 100).toFloat()
-
+                    }.toList().mapIndexed { index, (categoryName, transactionsInCategory) ->
+                        val categoryTotal = transactionsInCategory.sumOf { it.amount }
                         CategoryTotal(
                             categoryName = categoryName,
                             emoji = getCategoryEmoji(categoryName),
                             totalAmount = categoryTotal,
-                            percentage = percentage
+                            percentage = ((categoryTotal / totalExpense) * 100).toFloat(),
+                            color = chartColors[index % chartColors.size]
                         )
                     }.sortedByDescending { it.totalAmount }
                 }
 
-                _uiState.update { it.copy(categoryTotals = categoryTotalList) }
+                _uiState.update {
+                    it.copy(
+                        categoryTotals = categoryTotalList,
+                        totalExpense = totalExpense
+                    )
+                }
             }
         }
     }
@@ -202,7 +206,7 @@ class BudgetViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 budgetRepository.deleteBudget(budgetEntity)
-            } catch(e: Exception) {
+            } catch (e: Exception) {
                 _uiState.update {
                     it.copy(errorMessage = "Failed to delete budget. Please try again.")
                 }

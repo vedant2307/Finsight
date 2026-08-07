@@ -11,7 +11,8 @@ data class BudgetUiState(
     val totalBudget: Double = 0.0,
     val totalSpent: Double = 0.0,
     val errorMessage: String? = null,
-    val categoryTotals: List<CategoryTotal> = emptyList()
+    val categoryTotals: List<CategoryTotal> = emptyList(),
+    val totalExpense: Double = 0.0
 )
 
 data class BudgetProgress(
