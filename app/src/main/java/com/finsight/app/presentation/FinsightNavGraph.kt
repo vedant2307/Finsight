@@ -11,6 +11,7 @@ import com.finsight.app.presentation.addTransaction.AddTransactionScreen
 import com.finsight.app.presentation.budget.BudgetScreen
 import com.finsight.app.presentation.history.HistoryScreen
 import com.finsight.app.presentation.home.HomeScreen
+import com.finsight.app.presentation.insights.InsightsScreen
 import com.finsight.app.presentation.onboarding.OnboardingScreen
 import com.finsight.app.presentation.settings.SettingsScreen
 
@@ -44,6 +45,9 @@ fun FinsightNavGraph(
                 },
                 onEditTransaction = { transactionId ->
                     navController.navigate(Screen.AddTransaction.edit(transactionId))
+                },
+                onNavigateToSettings = {
+                    navController.navigate(Screen.Settings.route)
                 }
             )
         }
@@ -79,8 +83,15 @@ fun FinsightNavGraph(
         }
 
         composable(Screen.Settings.route) {
-            // SettingsScreen will go here
-            SettingsScreen()
+            SettingsScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(Screen.Insights.route) {
+            InsightsScreen()
         }
     }
 }

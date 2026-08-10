@@ -34,7 +34,6 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -145,44 +144,6 @@ fun BudgetScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            if (uiState.categoryTotals.isNotEmpty()) {
-                item {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = "Spending Overview",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            DonutChart(
-                                categoryTotals = uiState.categoryTotals,
-                                totalExpense = uiState.totalExpense
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-
-                item {
-                    CategoryBreakdownCard(categoryTotals = uiState.categoryTotals)
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-            }
-
             // ── OVERALL SUMMARY ───────────────────────────
             item {
                 OverallBudgetCard(

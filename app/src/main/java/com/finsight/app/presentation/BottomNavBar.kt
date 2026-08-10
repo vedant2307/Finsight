@@ -3,7 +3,7 @@ package com.finsight.app.presentation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Insights
 import androidx.compose.material.icons.filled.PieChart
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -27,13 +27,12 @@ data class BottomNavItem(
     val route: String
 )
 
-val bottomNavItems = listOf<BottomNavItem>(
+val bottomNavItems = listOf(
     BottomNavItem("Home", Icons.Default.Home, Screen.Home.route),
     BottomNavItem("History", Icons.AutoMirrored.Filled.List, Screen.History.route),
     BottomNavItem("Budget", Icons.Default.PieChart, Screen.Budget.route),
-    BottomNavItem("Profile", Icons.Default.Person, Screen.Settings.route),
-
-    )
+    BottomNavItem("Insights", Icons.Default.Insights, Screen.Insights.route),
+)
 
 @Composable
 fun BottomNavBar(navController: NavHostController) {

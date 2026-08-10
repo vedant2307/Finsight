@@ -19,11 +19,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -54,6 +56,7 @@ import java.util.Locale
 fun HomeScreen(
     onAddTransaction : () -> Unit,
     onEditTransaction : (Long) -> Unit,
+    onNavigateToSettings : () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -90,7 +93,7 @@ fun HomeScreen(
                 .padding(paddingValues)
         ) {
             // Header
-            item { HomeHeader(uiState = uiState) }
+            item { HomeHeader(uiState = uiState, onNavigateToSettings) }
 
             // Budget Progress
             item {
@@ -143,7 +146,7 @@ fun HomeScreen(
 // ── HEADER ────────────────────────────────────────────────
 
 @Composable
-fun HomeHeader(uiState: HomeUiState) {
+fun HomeHeader(uiState: HomeUiState, onNavigateToSettings : () -> Unit = {}) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -260,6 +263,18 @@ fun HomeHeader(uiState: HomeUiState) {
                     }
                 }
             }
+        }
+
+        // Settings icon overlaid top-right
+        IconButton(
+            onClick = onNavigateToSettings,
+            modifier = Modifier.align(Alignment.TopEnd)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Settings,
+                contentDescription = "Settings",
+                tint = Color.White
+            )
         }
     }
 }

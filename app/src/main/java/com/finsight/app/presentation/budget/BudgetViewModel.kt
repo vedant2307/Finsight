@@ -5,8 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.finsight.app.data.local.entity.BudgetEntity
 import com.finsight.app.data.repository.BudgetRepository
 import com.finsight.app.data.repository.TransactionRepository
-import com.finsight.app.domain.model.CategoryTotal
-import com.finsight.app.presentation.Utils.getCategoryEmoji
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -55,7 +53,6 @@ class BudgetViewModel @Inject constructor(
         endOfMonth = calendar.timeInMillis
 
         loadBudgets()
-        loadCategoryBreakDown()
     }
 
     private fun loadBudgets() {
@@ -139,39 +136,6 @@ class BudgetViewModel @Inject constructor(
         }
     }
 
-    private fun loadCategoryBreakDown() {
-        viewModelScope.launch {
-            transactionRepository.getAllTransactions().collect { transactions ->
-                val expenseTransactions = transactions.filter { it.type == "EXPENSE" }
-                val totalExpense = expenseTransactions.sumOf { it.amount }
-
-                val categoryTotalList: List<CategoryTotal> = if (totalExpense == 0.0) {
-                    emptyList()
-                } else {
-                    expenseTransactions.groupBy {
-                        it.category
-                    }.toList().mapIndexed { index, (categoryName, transactionsInCategory) ->
-                        val categoryTotal = transactionsInCategory.sumOf { it.amount }
-                        CategoryTotal(
-                            categoryName = categoryName,
-                            emoji = getCategoryEmoji(categoryName),
-                            totalAmount = categoryTotal,
-                            percentage = ((categoryTotal / totalExpense) * 100).toFloat(),
-                            color = chartColors[index % chartColors.size]
-                        )
-                    }.sortedByDescending { it.totalAmount }
-                }
-
-                _uiState.update {
-                    it.copy(
-                        categoryTotals = categoryTotalList,
-                        totalExpense = totalExpense
-                    )
-                }
-            }
-        }
-    }
-
     fun addBudget(category: String, amount: Double) {
         if (category.isBlank()) {
             _uiState.update { it.copy(errorMessage = "Please select a category") }
@@ -221,6 +185,5 @@ class BudgetViewModel @Inject constructor(
     fun onClearError() {
         _uiState.update { it.copy(errorMessage = null) }
     }
-
 
 }
