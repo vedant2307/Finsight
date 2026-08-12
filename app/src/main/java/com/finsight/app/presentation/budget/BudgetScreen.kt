@@ -237,13 +237,13 @@ fun OverallBudgetCard(totalBudget: Double, totalSpent: Double) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "₹${totalSpent.toInt()} spent",
+                    text = "${Utils.formatAmount(totalSpent)} spent",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
                 Text(
-                    text = "of ₹${totalBudget.toInt()}",
+                    text = "of ${Utils.formatAmount(totalBudget)}",
                     fontSize = 14.sp,
                     color = Color.White.copy(alpha = 0.8f)
                 )
@@ -381,12 +381,12 @@ fun BudgetCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "₹${budgetProgress.spent.toInt()} spent",
+                    text = "${Utils.formatAmount(budgetProgress.spent)} spent",
                     fontSize = 12.sp,
                     color = Color.Gray
                 )
                 Text(
-                    text = "₹${budgetProgress.budget.amount.toInt()} limit",
+                    text = "${Utils.formatAmount(budgetProgress.budget.amount)} limit",
                     fontSize = 12.sp,
                     color = Color.Gray
                 )

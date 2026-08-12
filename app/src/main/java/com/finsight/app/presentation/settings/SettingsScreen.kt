@@ -58,6 +58,7 @@ import com.finsight.app.ui.theme.Teal50
 import com.finsight.app.ui.theme.Teal500
 import com.finsight.app.ui.theme.Teal900
 import androidx.core.net.toUri
+import com.finsight.app.presentation.Utils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -192,7 +193,7 @@ fun SettingsScreen(
                 SettingsRow(
                     label = "Monthly Salary",
                     value = if (uiState.salary == 0.0) "Not set"
-                    else "${uiState.currency}${uiState.salary.toInt()}",
+                    else Utils.formatAmount(uiState.salary, uiState.currency),
                     onEdit = { showEditSalaryDialog = true }
                 )
                 SettingsRow(

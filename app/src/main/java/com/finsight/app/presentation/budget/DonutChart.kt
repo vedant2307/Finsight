@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.finsight.app.domain.model.CategoryTotal
+import com.finsight.app.presentation.Utils
 
 /**
  * A custom animated Donut Chart component using Jetpack Compose Canvas.
@@ -93,7 +94,7 @@ fun DonutChart(
         // Display the total expense amount in the center of the donut
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = "₹${totalExpense.toLong()}",
+                text = Utils.formatAmount(totalExpense),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )

@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.finsight.app.domain.model.CategoryTotal
+import com.finsight.app.presentation.Utils
 
 val chartColors = listOf(
     Color(0xFF4A9E8F), // teal — your app's primary
@@ -105,7 +106,7 @@ private fun CategoryBreakdownRow(categoryTotal: CategoryTotal) {
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    text = "₹${categoryTotal.totalAmount.toLong()}",
+                    text = Utils.formatAmount(categoryTotal.totalAmount),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold
                 )

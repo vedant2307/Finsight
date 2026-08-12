@@ -185,7 +185,7 @@ fun HomeHeader(uiState: HomeUiState, onNavigateToSettings : () -> Unit = {}) {
                     )
 
                     Text(
-                        text = "₹${String.format("%,.2f", uiState.totalBalance)}",
+                        text = Utils.formatAmount(uiState.totalBalance),
                         fontSize = 32.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
@@ -219,7 +219,7 @@ fun HomeHeader(uiState: HomeUiState, onNavigateToSettings : () -> Unit = {}) {
                                     color = Color.White.copy(alpha = 0.8f)
                                 )
                                 Text(
-                                    text = "₹${String.format("%,.0f", uiState.totalIncome)}",
+                                    text = Utils.formatAmount(uiState.totalIncome),
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     color = Color.White
@@ -251,7 +251,7 @@ fun HomeHeader(uiState: HomeUiState, onNavigateToSettings : () -> Unit = {}) {
                                     color = Color.White.copy(alpha = 0.8f)
                                 )
                                 Text(
-                                    text = "₹${String.format("%,.0f", uiState.totalExpense)}",
+                                    text = Utils.formatAmount(uiState.totalExpense),
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     color = Color.White
@@ -343,12 +343,12 @@ fun BudgetProgressSection(totalSpent: Double, totalBudget: Double) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Spent: ₹${totalSpent.toInt()}",
+                    text = "Spent: ${Utils.formatAmount(totalSpent)}",
                     fontSize = 12.sp,
                     color = Color.Gray
                 )
                 Text(
-                    text = "Budget: ₹${totalBudget.toInt()}",
+                    text = "Budget: ${Utils.formatAmount(totalBudget)}",
                     fontSize = 12.sp,
                     color = Color.Gray
                 )
@@ -409,7 +409,7 @@ fun TransactionItem(
         // Amount and date
         Column(horizontalAlignment = Alignment.End) {
             Text(
-                text = "$amountPrefix₹${String.format("%,.0f", transaction.amount)}",
+                text = "$amountPrefix${Utils.formatAmount(transaction.amount)}",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = amountColor
