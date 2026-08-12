@@ -44,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -157,10 +158,38 @@ fun HistoryScreen(
                     }
                 }
 
-                uiState.filteredTransactions.isEmpty() -> {
+                uiState.filteredTransactions.isEmpty() && uiState.searchQuery.isBlank() -> {
                     EmptyHistoryState(
                         isSearching = uiState.searchQuery.isNotEmpty()
                     )
+                }
+
+                uiState.filteredTransactions.isEmpty() && uiState.searchQuery.isNotBlank() -> {
+                    // new state — search returned nothing
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(48.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(text = "🔍", fontSize = 48.sp)
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "No results found",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = Color(0xFF1A1A1A)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "No transactions match \"${uiState.searchQuery}\"",
+                                fontSize = 13.sp,
+                                color = Color.Gray,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
                 }
 
                 else -> {
@@ -181,7 +210,7 @@ fun HistoryScreen(
 fun FilterTabs(
     selectedFilter: TransactionFilter,
     onFilterChange: (TransactionFilter) -> Unit
-)  {
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -251,7 +280,7 @@ fun TransactionList(
             ) { transaction ->
                 SwipeToDeleteTransactionItem(
                     transaction = transaction,
-                    onClick = {onEditTransaction(transaction.id)},
+                    onClick = { onEditTransaction(transaction.id) },
                     onDeleteRequest = { onDeleteTransaction(transaction) }
                 )
             }
