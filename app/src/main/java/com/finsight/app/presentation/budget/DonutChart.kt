@@ -56,7 +56,7 @@ fun DonutChart(
         contentAlignment = Alignment.Center
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val strokeWidth = 40.dp.toPx()
+            val strokeWidth = 28.dp.toPx()
             // Subtract strokeWidth to ensure the entire arc stays within the Canvas bounds
             val radius = (size.minDimension - strokeWidth) / 2
             
